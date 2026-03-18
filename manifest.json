@@ -1,0 +1,71 @@
+{
+  "manifest_version": "0.3",
+  "name": "@tradeproof/mcp-server",
+  "display_name": "TradeProof",
+  "description": "Look up contractor licenses and workers' compensation insurance across all 50 US states. 3.1M+ records sourced from official state licensing board databases.",
+  "version": "1.0.0",
+  "author": {
+    "name": "TradeProof",
+    "url": "https://tradeproof.net",
+    "email": "support@tradeproof.net"
+  },
+  "repository": "https://github.com/edcadet10/tradeproof-mcp-server",
+  "privacy_policies": ["https://tradeproof.net/privacy"],
+  "authentication": {
+    "type": "api_key",
+    "env_var": "TRADEPROOF_API_KEY",
+    "instructions": "Get your free API key at https://tradeproof.net/app#/api-keys"
+  },
+  "tools": [
+    {
+      "name": "lookup_license",
+      "description": "Look up a specific contractor license by state and license number",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "search_contractors",
+      "description": "Search for contractors by business name, optionally filtered by state, city, classification, or status",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "check_batch",
+      "description": "Check the status of multiple contractor licenses at once (up to 100)",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "check_insurance",
+      "description": "Check workers' compensation insurance coverage for an employer in a specific state",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "get_coverage_info",
+      "description": "Get information about TradeProof's data coverage across US states (free, no quota cost)",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    }
+  ]
+}

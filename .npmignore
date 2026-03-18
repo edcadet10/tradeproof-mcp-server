@@ -1,0 +1,16 @@
+src/
+tsconfig.json
+.github/
+.env
+.env.*
+node_modules/
+*.ts
+!*.d.ts
+.git/
+.gitignore
+.org-deploy/
+tests/
+coverage/
+.vscode/
+.idea/
+*.map

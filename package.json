@@ -1,0 +1,58 @@
+{
+  "name": "@tradeproof/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for contractor license lookups across all 50 US states — 3.1M+ records from official state licensing boards",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "tradeproof-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "manifest.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build",
+    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude",
+    "contractor-license",
+    "license-lookup",
+    "construction",
+    "insurance",
+    "workers-comp",
+    "compliance",
+    "tradeproof"
+  ],
+  "author": "TradeProof <support@tradeproof.net> (https://tradeproof.net)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edcadet10/tradeproof-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/edcadet10/tradeproof-mcp-server/issues"
+  },
+  "homepage": "https://tradeproof.net",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsx": "^4.7.0"
+  }
+}
