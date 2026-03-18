@@ -38,7 +38,9 @@ export function registerSearchContractors(server: McpServer, client: TradeProofC
         return formatError(result.error);
       }
 
-      const { items, total, pages } = result.data;
+      const items = result.data.items ?? result.data.results ?? [];
+      const total = result.data.total ?? 0;
+      const pages = result.data.pages ?? (Math.ceil(total / per_page) || 1);
 
       if (items.length === 0) {
         let msg = `No contractors found matching "${business_name}"`;

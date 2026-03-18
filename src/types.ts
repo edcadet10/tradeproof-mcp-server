@@ -20,11 +20,12 @@ export interface LicenseRecord {
 }
 
 export interface SearchResponse {
-  items: LicenseRecord[];
+  items?: LicenseRecord[];
+  results?: LicenseRecord[];
   total: number;
   page: number;
   per_page: number;
-  pages: number;
+  pages?: number;
   search_normalized?: boolean;
   normalized_query?: string;
   other_states?: Array<{ state: string; count: number }>;
