@@ -1,7 +1,7 @@
 {
   "name": "@tradeproof/mcp-server",
-  "version": "1.0.0",
-  "description": "MCP server for contractor license lookups across all 50 US states — 3.1M+ records from official state licensing boards",
+  "version": "1.0.1",
+  "description": "MCP server for contractor license lookups across all 50 US states — 5M+ records from official state licensing boards",
   "type": "module",
   "main": "dist/index.js",
   "bin": {

@@ -1,6 +1,6 @@
 # @tradeproof/mcp-server
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that gives Claude access to contractor license data across all 50 US states and Washington, DC. Powered by [TradeProof](https://tradeproof.net) — 3.1 million+ license records sourced from official state licensing board databases.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that gives Claude access to contractor license data across all 50 US states and Washington, DC. Powered by [TradeProof](https://tradeproof.net) — 5 million+ license records sourced from official state licensing board databases.
 
 ## What This Does
 

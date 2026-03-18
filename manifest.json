@@ -2,8 +2,8 @@
   "manifest_version": "0.3",
   "name": "@tradeproof/mcp-server",
   "display_name": "TradeProof",
-  "description": "Look up contractor licenses and workers' compensation insurance across all 50 US states. 3.1M+ records sourced from official state licensing board databases.",
-  "version": "1.0.0",
+  "description": "Look up contractor licenses and workers' compensation insurance across all 50 US states. 5M+ records sourced from official state licensing board databases.",
+  "version": "1.0.1",
   "author": {
     "name": "TradeProof",
     "url": "https://tradeproof.net",
