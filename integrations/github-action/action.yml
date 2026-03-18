@@ -1,0 +1,34 @@
+name: TradeProof License Check
+description: Verify contractor licenses against 5M+ official state records via TradeProof API
+author: TradeProof (edcadet10)
+
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  api_key:
+    description: TradeProof API key (store as a GitHub secret)
+    required: true
+  licenses:
+    description: >
+      JSON array of licenses to check.
+      Each object needs "state" (2-letter code) and "license_number".
+      Example: [{"state":"FL","license_number":"CGC061473"}]
+    required: true
+  fail_on_invalid:
+    description: Fail the action if any license is invalid or not found
+    required: false
+    default: "true"
+
+outputs:
+  results:
+    description: JSON string with full verification results for every license
+  summary:
+    description: Human-readable summary (e.g. "3/4 licenses active")
+  all_valid:
+    description: '"true" if every license is active/valid, "false" otherwise'
+
+runs:
+  using: node20
+  main: index.js

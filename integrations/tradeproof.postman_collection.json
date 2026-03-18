@@ -1,0 +1,292 @@
+{
+	"info": {
+		"_postman_id": "tradeproof-api-collection",
+		"name": "TradeProof API",
+		"description": "Contractor license and insurance data across all 50 US states. 5M+ records from official state licensing boards.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "key",
+				"value": "X-API-Key",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": "{{apiKey}}",
+				"type": "string"
+			},
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "License Lookup",
+			"description": "Endpoints for looking up, searching, and batch-verifying contractor licenses.",
+			"item": [
+				{
+					"name": "Look Up License",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/licenses/{{state}}/{{license_number}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"licenses",
+								"{{state}}",
+								"{{license_number}}"
+							],
+							"variable": [
+								{
+									"key": "state",
+									"value": "CA",
+									"description": "Two-letter US state code (e.g. CA, FL, TX)."
+								},
+								{
+									"key": "license_number",
+									"value": "B-1234567",
+									"description": "The contractor license number issued by the state licensing board."
+								}
+							]
+						},
+						"description": "Retrieve full details for a single contractor license by state and license number. Returns license status, holder name, classification, issue/expiration dates, and disciplinary history when available."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Contractors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/licenses?business_name={{business_name}}&state={{state}}&page=1&per_page=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"licenses"
+							],
+							"query": [
+								{
+									"key": "business_name",
+									"value": "{{business_name}}",
+									"description": "Business or contractor name to search for. Partial matches supported."
+								},
+								{
+									"key": "state",
+									"value": "{{state}}",
+									"description": "Two-letter US state code to filter results."
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number for paginated results (starts at 1)."
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Number of results per page (max 100)."
+								}
+							]
+						},
+						"description": "Search for contractor licenses by business name and state. Returns a paginated list of matching licenses with summary information. Use the page and per_page parameters to navigate large result sets."
+					},
+					"response": []
+				},
+				{
+					"name": "Batch Check",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"licenses\": [\n\t\t{\n\t\t\t\"state\": \"FL\",\n\t\t\t\"license_number\": \"CGC061473\"\n\t\t},\n\t\t{\n\t\t\t\"state\": \"CA\",\n\t\t\t\"license_number\": \"FAKE99999\"\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/verify/batch",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"verify",
+								"batch"
+							]
+						},
+						"description": "Verify multiple contractor licenses in a single request. Submit an array of state/license_number pairs and receive the verification status of each. Useful for onboarding workflows where you need to validate several contractors at once. Invalid or unrecognized licenses are returned with a failed status."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Insurance",
+			"description": "Endpoints for verifying contractor insurance coverage.",
+			"item": [
+				{
+					"name": "Check Workers Comp",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "{{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/insurance/verify/wc/{{state}}/{{employer}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"insurance",
+								"verify",
+								"wc",
+								"{{state}}",
+								"{{employer}}"
+							],
+							"variable": [
+								{
+									"key": "state",
+									"value": "CA",
+									"description": "Two-letter US state code where the employer operates."
+								},
+								{
+									"key": "employer",
+									"value": "Smith Roofing",
+									"description": "Employer or business name to verify workers compensation coverage for."
+								}
+							]
+						},
+						"description": "Verify whether a contractor or employer has active workers compensation insurance in a given state. Returns policy status, carrier information, and coverage dates when available. Essential for compliance checks before allowing contractors on job sites."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Coverage (Public)",
+			"description": "Public endpoints that do not require authentication. Useful for checking API availability and data coverage before integrating.",
+			"item": [
+				{
+					"name": "Get Coverage",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/coverage",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"coverage"
+							]
+						},
+						"description": "Returns a breakdown of data coverage by state, including the number of license records indexed and the date each state was last updated. No authentication required."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Stats",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"stats"
+							]
+						},
+						"description": "Returns aggregate statistics for the TradeProof database, including total license records, number of states covered, and last-updated timestamps. No authentication required."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://tradeproof.net",
+			"type": "string"
+		},
+		{
+			"key": "apiKey",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "state",
+			"value": "FL",
+			"type": "string"
+		},
+		{
+			"key": "license_number",
+			"value": "CGC061473",
+			"type": "string"
+		},
+		{
+			"key": "business_name",
+			"value": "ABC",
+			"type": "string"
+		},
+		{
+			"key": "employer",
+			"value": "Smith Roofing",
+			"type": "string"
+		}
+	]
+}

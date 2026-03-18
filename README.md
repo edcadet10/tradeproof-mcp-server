@@ -16,7 +16,7 @@ Claude calls the TradeProof API behind the scenes and returns structured results
 ## Prerequisites
 
 - **Node.js 18+** (for native `fetch` support)
-- **TradeProof API key** — get one free at [tradeproof.net/app#/api-keys](https://tradeproof.net/app#/api-keys)
+- **TradeProof API key** — get one free at [tradeproof.net/app#/settings](https://tradeproof.net/app#/settings)
 
 ## Installation
 
@@ -139,7 +139,7 @@ See which states and data types TradeProof covers. **This tool does not consume 
 ## Getting an API Key
 
 1. Go to [tradeproof.net](https://tradeproof.net) and create an account
-2. Navigate to **Settings > API Keys** (or go directly to [tradeproof.net/app#/api-keys](https://tradeproof.net/app#/api-keys))
+2. Navigate to **Settings > API Keys** (or go directly to [tradeproof.net/app#/settings](https://tradeproof.net/app#/settings))
 3. Click **Create API Key**
 4. Copy your key (it starts with `tp_live_`)
 5. Use it in your Claude configuration as shown above
@@ -171,7 +171,7 @@ The server requires an API key. Make sure you have set it in your Claude Desktop
 
 ### "Invalid TradeProof API key"
 
-Your API key may be incorrect, expired, or revoked. Go to [tradeproof.net/app#/api-keys](https://tradeproof.net/app#/api-keys) to check your key status or create a new one.
+Your API key may be incorrect, expired, or revoked. Go to [tradeproof.net/app#/settings](https://tradeproof.net/app#/settings) to check your key status or create a new one.
 
 ### "Monthly lookup limit reached"
 
@@ -210,6 +210,6 @@ MIT
 
 - [TradeProof Website](https://tradeproof.net)
 - [API Documentation](https://tradeproof.net/api-docs)
-- [Get an API Key](https://tradeproof.net/app#/api-keys)
+- [Get an API Key](https://tradeproof.net/app#/settings)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [Report an Issue](https://github.com/edcadet10/tradeproof-mcp-server/issues)

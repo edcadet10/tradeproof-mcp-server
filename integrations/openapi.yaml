@@ -1,0 +1,817 @@
+openapi: 3.0.3
+info:
+  title: TradeProof API
+  description: |
+    Contractor license and insurance verification data across all 50 US states.
+    Over 5 million records sourced directly from official state licensing boards.
+
+    ## Authentication
+    All authenticated endpoints require an API key passed via the `X-API-Key` header.
+    Obtain your key from the [TradeProof Developer Portal](https://tradeproof.net/app#/developer).
+
+    ## Pricing Tiers
+    | Plan | Price | Lookups/Month |
+    |------|-------|---------------|
+    | Free | $0 | 25 |
+    | Developer | $99/mo | 1,000 |
+    | Scale | $349/mo | 10,000 |
+
+    ## Rate Limits
+    Rate limits are enforced per API key. The `X-RateLimit-Remaining` and
+    `X-RateLimit-Reset` headers are included in every response so you can
+    track your usage programmatically. Exceeding your plan's quota returns `429`.
+  version: 1.0.0
+  contact:
+    name: TradeProof Support
+    email: support@tradeproof.net
+    url: https://tradeproof.net
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://tradeproof.net/terms
+
+externalDocs:
+  description: Full API documentation
+  url: https://tradeproof.net/api-docs
+
+servers:
+  - url: https://tradeproof.net
+    description: Production
+
+tags:
+  - name: Licenses
+    description: Contractor license lookup and search
+  - name: Verification
+    description: Batch license verification and workers' comp checks
+  - name: Public
+    description: Unauthenticated endpoints for coverage and statistics
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /v1/licenses/{state}/{license_number}:
+    get:
+      operationId: getLicenseByNumber
+      summary: Look up a specific license
+      description: |
+        Retrieve full details for a single contractor license by state and
+        license number. Returns the latest data from the state licensing board.
+      tags:
+        - Licenses
+      parameters:
+        - name: state
+          in: path
+          required: true
+          description: Two-letter US state code (e.g. CA, TX, FL).
+          schema:
+            type: string
+            pattern: "^[A-Z]{2}$"
+            minLength: 2
+            maxLength: 2
+          example: CA
+        - name: license_number
+          in: path
+          required: true
+          description: The license number as issued by the state licensing board.
+          schema:
+            type: string
+            maxLength: 50
+          example: "1098765"
+      responses:
+        "200":
+          description: License found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LicenseResponse"
+              example:
+                license_number: "1098765"
+                state: California
+                business_name: Acme Construction Inc.
+                dba_name: Acme Builders
+                status: Active
+                license_type: General Building Contractor
+                classifications:
+                  - "B - General Building"
+                  - "C-10 - Electrical"
+                issue_date: "2018-03-15"
+                expiration_date: "2026-03-31"
+                city: Los Angeles
+                state_code: CA
+                zip_code: "90012"
+                phone: "213-555-0199"
+                entity_type: Corporation
+                bond_amount: 25000
+                workers_comp: true
+                has_disciplinary_action: false
+                last_updated: "2026-03-17T04:00:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /v1/licenses:
+    get:
+      operationId: searchLicenses
+      summary: Search licenses by business name
+      description: |
+        Search contractor licenses across states using a business name query.
+        Results are paginated and can be filtered by state, city,
+        classification, or status.
+      tags:
+        - Licenses
+      parameters:
+        - name: business_name
+          in: query
+          required: true
+          description: Full or partial business name to search for. Case-insensitive.
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 200
+          example: Acme Construction
+        - name: state
+          in: query
+          required: false
+          description: Filter by two-letter state code.
+          schema:
+            type: string
+            pattern: "^[A-Z]{2}$"
+            minLength: 2
+            maxLength: 2
+          example: CA
+        - name: city
+          in: query
+          required: false
+          description: Filter by city name. Case-insensitive.
+          schema:
+            type: string
+            maxLength: 100
+          example: Los Angeles
+        - name: classification
+          in: query
+          required: false
+          description: Filter by license classification code (e.g. "B", "C-10").
+          schema:
+            type: string
+            maxLength: 50
+          example: B
+        - name: status
+          in: query
+          required: false
+          description: Filter by license status (e.g. Active, Expired, Suspended).
+          schema:
+            type: string
+            maxLength: 30
+          example: Active
+        - name: page
+          in: query
+          required: false
+          description: Page number for pagination.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          example: 1
+        - name: per_page
+          in: query
+          required: false
+          description: Number of results per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+          example: 25
+      responses:
+        "200":
+          description: Search results returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LicenseSearchResponse"
+              example:
+                total: 3
+                page: 1
+                per_page: 25
+                results:
+                  - license_number: "1098765"
+                    state: California
+                    business_name: Acme Construction Inc.
+                    dba_name: Acme Builders
+                    status: Active
+                    license_type: General Building Contractor
+                    classifications:
+                      - "B - General Building"
+                    issue_date: "2018-03-15"
+                    expiration_date: "2026-03-31"
+                    city: Los Angeles
+                    state_code: CA
+                    zip_code: "90012"
+                    phone: "213-555-0199"
+                    entity_type: Corporation
+                    bond_amount: 25000
+                    workers_comp: true
+                    has_disciplinary_action: false
+                    last_updated: "2026-03-17T04:00:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /v1/verify/batch:
+    post:
+      operationId: batchVerifyLicenses
+      summary: Verify multiple licenses in one request
+      description: |
+        Submit up to 100 license number + state pairs and receive a verification
+        result for each. Ideal for onboarding flows, bid-table checks, or
+        periodic compliance sweeps.
+      tags:
+        - Verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchVerifyRequest"
+            example:
+              licenses:
+                - state: CA
+                  license_number: "1098765"
+                - state: TX
+                  license_number: "54321"
+                - state: FL
+                  license_number: "CBC000999"
+      responses:
+        "200":
+          description: Verification results for each submitted license.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BatchVerifyResult"
+              example:
+                - license_number: "1098765"
+                  state: CA
+                  valid: true
+                  status: Active
+                  business_name: Acme Construction Inc.
+                  expiration_date: "2026-03-31"
+                  license_type: General Building Contractor
+                  city: Los Angeles
+                  workers_comp: true
+                  bond_amount: 25000
+                  last_updated: "2026-03-17T04:00:00Z"
+                - license_number: "54321"
+                  state: TX
+                  valid: true
+                  status: Active
+                  business_name: Lone Star Builders LLC
+                  expiration_date: "2027-01-15"
+                  license_type: General Contractor
+                  city: Houston
+                  workers_comp: true
+                  bond_amount: 15000
+                  last_updated: "2026-03-16T12:00:00Z"
+                - license_number: "CBC000999"
+                  state: FL
+                  valid: false
+                  status: Expired
+                  business_name: Sunshine Roofing Co.
+                  expiration_date: "2024-08-31"
+                  license_type: Certified Building Contractor
+                  city: Miami
+                  workers_comp: false
+                  bond_amount: null
+                  last_updated: "2026-03-15T08:00:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /v1/insurance/verify/wc/{state}/{employer}:
+    get:
+      operationId: verifyWorkersComp
+      summary: Verify workers' compensation coverage
+      description: |
+        Check whether an employer has active workers' compensation insurance
+        in a given state. Data is sourced from state workers' comp boards and
+        proof-of-coverage databases.
+      tags:
+        - Verification
+      parameters:
+        - name: state
+          in: path
+          required: true
+          description: Two-letter US state code.
+          schema:
+            type: string
+            pattern: "^[A-Z]{2}$"
+            minLength: 2
+            maxLength: 2
+          example: NY
+        - name: employer
+          in: path
+          required: true
+          description: Employer name or identifier as registered with the state WC board.
+          schema:
+            type: string
+            maxLength: 200
+          example: Acme Construction Inc.
+      responses:
+        "200":
+          description: Workers' compensation verification result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WCVerifyResponse"
+              example:
+                found: true
+                employer: Acme Construction Inc.
+                state: NY
+                account_number: "WC-2024-00345"
+                coverage_start: "2025-01-01"
+                coverage_end: "2026-01-01"
+                status: Active
+                verified_at: "2026-03-18T10:30:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /v1/coverage:
+    get:
+      operationId: getCoverage
+      summary: List supported states
+      description: |
+        Returns which US states are currently supported for license lookups
+        and workers' compensation verification. No authentication required.
+      tags:
+        - Public
+      security: []
+      responses:
+        "200":
+          description: Coverage summary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoverageResponse"
+              example:
+                license_states:
+                  - AL
+                  - AK
+                  - AZ
+                  - CA
+                  - FL
+                  - NY
+                  - TX
+                wc_states:
+                  - CA
+                  - FL
+                  - NY
+                  - TX
+                total_license_states: 51
+                total_wc_states: 12
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /v1/stats:
+    get:
+      operationId: getStats
+      summary: Get database statistics
+      description: |
+        Returns aggregate statistics about the TradeProof database, including
+        total license count and data freshness. No authentication required.
+      tags:
+        - Public
+      security: []
+      responses:
+        "200":
+          description: Database statistics.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsResponse"
+              example:
+                total_licenses: 5130113
+                states_covered:
+                  - AL
+                  - AK
+                  - AZ
+                  - AR
+                  - CA
+                  - CO
+                  - CT
+                  - DE
+                  - DC
+                  - FL
+                last_data_update: "2026-03-17T04:00:00Z"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        API key for authentication. Obtain yours from the
+        [TradeProof Developer Portal](https://tradeproof.net/app#/developer).
+
+  schemas:
+    LicenseResponse:
+      type: object
+      description: Full license record from a state licensing board.
+      properties:
+        license_number:
+          type: string
+          description: License number as issued by the state.
+          example: "1098765"
+        state:
+          type: string
+          description: Full state name.
+          example: California
+        business_name:
+          type: string
+          description: Legal business name on the license.
+          example: Acme Construction Inc.
+        dba_name:
+          type: string
+          nullable: true
+          description: Doing-business-as name, if any.
+          example: Acme Builders
+        status:
+          type: string
+          description: Current license status (e.g. Active, Expired, Suspended, Revoked).
+          example: Active
+        license_type:
+          type: string
+          nullable: true
+          description: Type or category of the license.
+          example: General Building Contractor
+        classifications:
+          type: array
+          items:
+            type: string
+          description: List of trade classifications on the license.
+          example:
+            - "B - General Building"
+            - "C-10 - Electrical"
+        issue_date:
+          type: string
+          format: date
+          nullable: true
+          description: Date the license was originally issued (YYYY-MM-DD).
+          example: "2018-03-15"
+        expiration_date:
+          type: string
+          format: date
+          nullable: true
+          description: Date the license expires (YYYY-MM-DD).
+          example: "2026-03-31"
+        city:
+          type: string
+          nullable: true
+          description: City of the licensee's address on file.
+          example: Los Angeles
+        state_code:
+          type: string
+          description: Two-letter state code.
+          example: CA
+        zip_code:
+          type: string
+          nullable: true
+          description: ZIP code of the licensee's address on file.
+          example: "90012"
+        phone:
+          type: string
+          nullable: true
+          description: Phone number on file, if available.
+          example: "213-555-0199"
+        entity_type:
+          type: string
+          nullable: true
+          description: Business entity type (e.g. Corporation, LLC, Sole Proprietor).
+          example: Corporation
+        bond_amount:
+          type: number
+          nullable: true
+          description: Contractor bond amount in USD, if applicable.
+          example: 25000
+        workers_comp:
+          type: boolean
+          nullable: true
+          description: Whether the licensee has workers' compensation coverage on file.
+          example: true
+        has_disciplinary_action:
+          type: boolean
+          nullable: true
+          description: Whether any disciplinary actions are recorded against this license.
+          example: false
+        last_updated:
+          type: string
+          format: date-time
+          description: Timestamp of the last data refresh from the source (ISO 8601).
+          example: "2026-03-17T04:00:00Z"
+      required:
+        - license_number
+        - state
+        - business_name
+        - status
+        - state_code
+        - last_updated
+
+    LicenseSearchResponse:
+      type: object
+      description: Paginated search results for license queries.
+      properties:
+        total:
+          type: integer
+          description: Total number of matching records.
+          example: 42
+        page:
+          type: integer
+          description: Current page number.
+          example: 1
+        per_page:
+          type: integer
+          description: Number of results per page.
+          example: 25
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/LicenseResponse"
+          description: Array of matching license records.
+      required:
+        - total
+        - page
+        - per_page
+        - results
+
+    BatchVerifyRequest:
+      type: object
+      description: Request body for batch license verification.
+      properties:
+        licenses:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            properties:
+              state:
+                type: string
+                pattern: "^[A-Z]{2}$"
+                description: Two-letter US state code.
+                example: CA
+              license_number:
+                type: string
+                description: License number to verify.
+                example: "1098765"
+            required:
+              - state
+              - license_number
+          description: Array of state + license number pairs to verify (max 100).
+      required:
+        - licenses
+
+    BatchVerifyResult:
+      type: object
+      description: Verification result for a single license in a batch request.
+      properties:
+        license_number:
+          type: string
+          description: The license number that was checked.
+          example: "1098765"
+        state:
+          type: string
+          description: Two-letter state code.
+          example: CA
+        valid:
+          type: boolean
+          description: Whether the license is currently valid (active and not expired).
+          example: true
+        status:
+          type: string
+          nullable: true
+          description: Current status of the license.
+          example: Active
+        business_name:
+          type: string
+          nullable: true
+          description: Business name on the license.
+          example: Acme Construction Inc.
+        expiration_date:
+          type: string
+          format: date
+          nullable: true
+          description: License expiration date (YYYY-MM-DD).
+          example: "2026-03-31"
+        license_type:
+          type: string
+          nullable: true
+          description: Type or category of the license.
+          example: General Building Contractor
+        city:
+          type: string
+          nullable: true
+          description: City of the licensee.
+          example: Los Angeles
+        workers_comp:
+          type: boolean
+          nullable: true
+          description: Whether workers' comp coverage is on file.
+          example: true
+        bond_amount:
+          type: number
+          nullable: true
+          description: Bond amount in USD.
+          example: 25000
+        last_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the last data refresh (ISO 8601).
+          example: "2026-03-17T04:00:00Z"
+      required:
+        - license_number
+        - state
+        - valid
+
+    WCVerifyResponse:
+      type: object
+      description: Workers' compensation insurance verification result.
+      properties:
+        found:
+          type: boolean
+          description: Whether a matching WC record was found.
+          example: true
+        employer:
+          type: string
+          description: Employer name as searched.
+          example: Acme Construction Inc.
+        state:
+          type: string
+          description: Two-letter state code.
+          example: NY
+        account_number:
+          type: string
+          nullable: true
+          description: WC account or policy number on file.
+          example: "WC-2024-00345"
+        coverage_start:
+          type: string
+          format: date
+          nullable: true
+          description: Start date of the current coverage period (YYYY-MM-DD).
+          example: "2025-01-01"
+        coverage_end:
+          type: string
+          format: date
+          nullable: true
+          description: End date of the current coverage period (YYYY-MM-DD).
+          example: "2026-01-01"
+        status:
+          type: string
+          nullable: true
+          description: Coverage status (e.g. Active, Lapsed, Cancelled).
+          example: Active
+        verified_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the verification was performed (ISO 8601).
+          example: "2026-03-18T10:30:00Z"
+      required:
+        - found
+        - employer
+        - state
+
+    CoverageResponse:
+      type: object
+      description: Summary of which US states TradeProof currently covers.
+      properties:
+        license_states:
+          type: array
+          items:
+            type: string
+          description: States with license data available.
+        wc_states:
+          type: array
+          items:
+            type: string
+          description: States with workers' comp verification available.
+        total_license_states:
+          type: integer
+          description: Count of states with license data.
+          example: 51
+        total_wc_states:
+          type: integer
+          description: Count of states with WC verification.
+          example: 12
+      required:
+        - license_states
+        - wc_states
+        - total_license_states
+        - total_wc_states
+
+    StatsResponse:
+      type: object
+      description: Aggregate statistics about the TradeProof database.
+      properties:
+        total_licenses:
+          type: integer
+          description: Total number of license records in the database.
+          example: 5130113
+        states_covered:
+          type: array
+          items:
+            type: string
+          description: List of state codes with data.
+        last_data_update:
+          type: string
+          format: date-time
+          description: Timestamp of the most recent data refresh (ISO 8601).
+          example: "2026-03-17T04:00:00Z"
+      required:
+        - total_licenses
+        - states_covered
+        - last_data_update
+
+    ErrorResponse:
+      type: object
+      description: Standard error response body.
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message.
+          example: "License not found for state CA with number 0000000."
+      required:
+        - detail
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            detail: "Missing or invalid API key. Include a valid key in the X-API-Key header."
+
+    Forbidden:
+      description: API key does not have access to this resource or plan limit reached.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            detail: "Your current plan does not include access to this endpoint. Upgrade at https://tradeproof.net/app#/developer."
+
+    NotFound:
+      description: The requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            detail: "No matching record found."
+
+    RateLimited:
+      description: Monthly lookup quota exceeded for your plan.
+      headers:
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Number of lookups remaining in the current billing period.
+        X-RateLimit-Reset:
+          schema:
+            type: string
+            format: date-time
+          description: When your quota resets (ISO 8601).
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until your quota resets.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            detail: "Monthly lookup quota exceeded. Your plan allows 25 lookups/month. Upgrade at https://tradeproof.net/app#/developer."
