@@ -32,7 +32,7 @@ info:
 
 externalDocs:
   description: Full API documentation
-  url: https://tradeproof.net/api-docs
+  url: https://tradeproof.net/docs
 
 servers:
   - url: https://tradeproof.net

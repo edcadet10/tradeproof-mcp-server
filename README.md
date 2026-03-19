@@ -209,7 +209,7 @@ MIT
 ## Links
 
 - [TradeProof Website](https://tradeproof.net)
-- [API Documentation](https://tradeproof.net/api-docs)
+- [API Documentation](https://tradeproof.net/docs)
 - [Get an API Key](https://tradeproof.net/app#/settings)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [Report an Issue](https://github.com/edcadet10/tradeproof-mcp-server/issues)
